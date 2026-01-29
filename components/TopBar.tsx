@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NodeStats, SystemStats } from '../types';
 
@@ -22,7 +21,7 @@ const TopBar: React.FC<TopBarProps> = ({ nodeStats, systemStats }) => {
           <div className="w-6 h-6 bg-[#C51A4A] rounded flex items-center justify-center shadow-lg">
             <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
           </div>
-          <span className="text-sm font-bold tracking-tight text-white">Web3Pi<span className="text-[#C51A4A]">OS</span></span>
+          <span className="text-sm font-bold tracking-tight text-white">PiNet<span className="text-[#C51A4A]">OS</span></span>
         </div>
         
         <div className="hidden md:flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">

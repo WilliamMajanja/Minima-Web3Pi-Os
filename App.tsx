@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Desktop from './components/Desktop';
 import Taskbar from './components/Taskbar';
@@ -20,8 +19,8 @@ const App: React.FC = () => {
   const [windows, setWindows] = useState<WindowState[]>([
     { id: 'minima-node', title: 'Minima Node', isOpen: true, isMinimized: false, zIndex: 10 },
     { id: 'system-monitor', title: 'System Monitor', isOpen: false, isMinimized: false, zIndex: 1 },
-    { id: 'terminal', title: 'OS Shell', isOpen: false, isMinimized: false, zIndex: 1 },
-    { id: 'ai-assistant', title: 'Web3 Assistant', isOpen: false, isMinimized: false, zIndex: 1 },
+    { id: 'terminal', title: 'PiNet Shell', isOpen: false, isMinimized: false, zIndex: 1 },
+    { id: 'ai-assistant', title: 'PiNet AI Assistant', isOpen: false, isMinimized: false, zIndex: 1 },
     { id: 'wallet', title: 'Web3 Wallet', isOpen: false, isMinimized: false, zIndex: 1 },
     { id: 'maxima-messenger', title: 'Maxima Messenger', isOpen: false, isMinimized: false, zIndex: 1 },
     { id: 'cluster-manager', title: 'Cluster Hub', isOpen: false, isMinimized: false, zIndex: 1 },

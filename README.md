@@ -1,68 +1,57 @@
+# 🚀 PiNet Web3 OS by Minima
 
-# 🚀 Web3PiOS: The Official Decentralized Raspberry Pi Distribution
-
-> **The first Web3-native operating system designed for high-performance Raspberry Pi 5 clusters, autonomous node management, and Agentic AI orchestration.**
+> **The definitive Web3-native operating system for Raspberry Pi 5 clusters. Decentralized, autonomous, and AI-orchestrated.**
 
 ---
 
 <p align="center">
-  <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop" alt="Web3PiOS Architecture" width="800" style="border-radius: 20px; box-shadow: 0 20px 50px rgba(197, 26, 74, 0.3);">
+  <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop" alt="PiNet OS Architecture" width="800" style="border-radius: 20px; box-shadow: 0 20px 50px rgba(197, 26, 74, 0.3);">
   <br>
-  <i>OS Architecture and Cluster Topology visualized by <b>Nano Banana Pro</b> (Gemini 3 Pro Image).</i>
+  <i>Hardware Cluster topology and sharding visualization generated via <b>Nano Banana Pro</b>.</i>
 </p>
 
-## ✨ High-Level Vision
-**Web3PiOS** transforms standard Raspberry Pi hardware into a sovereign decentralized compute unit. By leveraging the **Minima Protocol** for core decentralization and **Google Gemini 3** for intelligent cluster orchestration, we provide a "One-Click" solution for the emerging DePIN (Decentralized Physical Infrastructure) economy.
+## ✨ The Vision
+**PiNet Web3 OS** is more than a Linux distribution; it's a sovereign node in the global DePIN economy. By combining the **Minima Protocol** for ultra-decentralization with a hybrid AI stack (**Google Gemini + Local AirLLM**), PiNet provides the infrastructure for truly autonomous agentic networks.
 
-## 🔥 Key Intelligence Features (Gemini 3 & 2.5)
+## 🔥 Integrated Intelligence
 
-### 🧠 Neural Thinking Mode
-Powered by `gemini-3-pro-preview` with a **32,768 token thinking budget**. 
-- Solves complex P2P routing issues autonomously.
-- Generates M.402 payment contract logic based on real-time cluster demand.
-- Architecturally aware of Master, Sense, and Storage node hierarchies.
+### 🌬️ Hybrid AI Stack
+PiNet toggles seamlessly between cloud and local inference:
+- **Cloud (Gemini 3 Pro):** High-level architectural reasoning, visual hardware diagnostics, and 4K media generation.
+- **Local (AirLLM):** Distributed "Free Llama" inference. Models are sharded across your local Pi cluster nodes, ensuring 100% privacy and zero-cost execution for standard tasks.
 
-### 🌬️ AirLLM "Free Llamas" Support
-Web3PiOS now supports **AirLLM** for local cluster inference.
-- Run large Llama-3 models locally on your Pi cluster.
-- Distributed model sharding across multiple nodes.
-- 100% private, "free as in beer" inference with zero cloud dependency.
+### 🧠 Neural Thinking & Vision
+- **Thinking Mode:** Complex P2P routing and contract logic generation using `gemini-3-pro-preview`.
+- **Nano Banana Engine:** Generates real-time system documentation and visual assets directly from the shell.
+- **Maps Grounding:** Geographic peer discovery and network optimization.
 
-### 🎨 Nano Banana Visual Engine
-System diagrams and marketing assets are generated directly within the OS shell using the `gemini-3-pro-image-preview` model. 
-- High-fidelity 1K resolution renders of hardware state.
-- Automated creation of documentation visuals for Grant submissions.
+## 🛠️ Core OS Architecture
 
-### 📍 Maps Grounding
-Integrated `googleMaps` tool via `gemini-2.5-flash` allows the OS to geolocate peers and optimize decentralized data center discovery with sub-meter accuracy.
-
-## 🛠️ Operating System Architecture
-
-| Feature | Specification |
+| Feature | Description |
 | :--- | :--- |
-| **Kernel** | 64-bit Real-Time Optimized (Raspberry Pi 5 Ready) |
-| **Networking** | PXE / ZTP Zero-Touch Network Provisioning |
-| **Payment Protocol** | M.402 Agentic Micro-Payments (Native Minima) |
-| **Messaging** | Maxima Secure Information Transport Layer |
-| **Inference** | Local AirLLM (Llama) & Google Gemini 3 Cloud Hybrid |
+| **Decentralization** | Native Minima Protocol (Every Pi is a Full Node) |
+| **Messaging** | Maxima Transport Layer (End-to-end encrypted P2P) |
+| **Payments** | M.402 Agentic Protocol (Autonomous micro-payments for compute) |
+| **Clustering** | Automated PXE Provisioning for Alpha, Beta, and Gamma nodes |
+| **Storage** | NVMe SSD Sharding & Data Persistence Agents |
 
-## 🚀 Grant Submission Packaging
-This distribution is optimized for the **Official Raspberry Pi OS Imager**. 
-- **Imager Portal**: Generates custom `os_list.json` snippets for official listing.
-- **Cluster Hub**: One-click broadcast of OS images to undiscovered nodes via local PXE.
-- **Agentic payments**: Fully integrated M.402 protocol for autonomous node revenue.
+## 🚀 DePAI Marketplace
+Deploy specialized agents to your cluster:
+- **AirLLM Worker:** Contributes to the local sharded inference pool.
+- **Environment Observer:** Fuses Sense Hat data with AI for proactive cooling/monitoring.
+- **Data Sharder:** Manages decentralized persistence across NVMe hats.
 
 ---
 
-### 📥 Getting Started
-1. Flash **Web3PiOS** using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
-2. Boot your Master Node (**Pi-Alpha**).
-3. Open **Cluster Hub** to auto-provision your Beta and Gamma nodes.
-4. Launch the **AI Assistant** to toggle between Gemini Cloud and Local AirLLM.
+### 📥 Installation
+1. Flash the image using the **Pi Imager Portal**.
+2. Boot your primary node to initiate the **Setup Wizard**.
+3. Connect sub-nodes to auto-join the cluster via PXE discovery.
+4. Launch the **PiNet AI Assistant** to manage your decentralized stack.
 
 ---
 
 <p align="center">
   <b>Decentralize your Hardware. Own your Intelligence.</b><br/>
-  <i>Built for the Raspberry Pi Community.</i>
+  <i>Developed for the Raspberry Pi 2024 Ecosystem.</i>
 </p>

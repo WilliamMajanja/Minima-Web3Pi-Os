@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 interface SetupWizardProps {
@@ -12,8 +11,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
 
   const steps = [
     {
-      title: "Welcome to Web3PiOS",
-      description: "The official Web3 distribution for Raspberry Pi. We'll help you configure your decentralized node and cluster stack.",
+      title: "Welcome to PiNet Web3 OS",
+      description: "The official Web3 distribution for Raspberry Pi by Minima. We'll help you configure your decentralized node and cluster stack.",
       icon: "🚀"
     },
     {
@@ -100,7 +99,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
           <svg className="w-4 h-4 text-[#C51A4A]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
-          Web3PiOS Imager Ready
+          PiNet Web3 OS Core
         </div>
       </div>
     </div>
