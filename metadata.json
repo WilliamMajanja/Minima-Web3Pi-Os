@@ -1,0 +1,8 @@
+{
+  "name": "Web3PiOS",
+  "description": "The official Web3-native operating system distribution for Raspberry Pi clusters. Featuring decentralized node management, hardware hat orchestration, and agentic payment protocols.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
