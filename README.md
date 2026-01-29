@@ -62,5 +62,5 @@ This distribution is optimized for the **Official Raspberry Pi OS Imager**.
 
 <p align="center">
   <b>Decentralize your Hardware. Own your Intelligence.</b><br/>
-  <i>Built for the Raspberry Pi Grant Competition 2024.</i>
+  <i>Built for the Raspberry Pi Foundation's Consideration.</i>
 </p>
