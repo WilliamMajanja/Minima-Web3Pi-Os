@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Desktop from './components/Desktop';
 import Taskbar from './components/Taskbar';
@@ -38,9 +39,9 @@ const App: React.FC = () => {
   });
 
   const [clusterNodes, setClusterNodes] = useState<ClusterNode[]>([
-    { id: 'n1', name: 'Pi-Alpha (Master)', ip: '192.168.1.10', hat: 'AI_NPU', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, npu: 0 } },
-    { id: 'n2', name: 'Pi-Beta (Sense)', ip: '192.168.1.11', hat: 'SENSE', status: 'online', metrics: { cpu: 8, ram: 1.4, temp: 42, env: { temp: 22.4, humidity: 45, pressure: 1012 } } },
-    { id: 'n3', name: 'Pi-Gamma (SSD)', ip: '192.168.1.12', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 15, ram: 3.2, temp: 48, iops: 4500 } },
+    { id: 'n1', name: 'Pi-Alpha (NVMe Storage Hub)', ip: '192.168.1.10', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } },
+    { id: 'n2', name: 'Pi-Beta (Intelligence Hub)', ip: '192.168.1.11', hat: 'AI_NPU', status: 'online', metrics: { cpu: 8, ram: 1.4, temp: 42, npu: 15 } },
+    { id: 'n3', name: 'Pi-Gamma (Sensory Node)', ip: '192.168.1.12', hat: 'SENSE', status: 'online', metrics: { cpu: 15, ram: 3.2, temp: 48, env: { temp: 22.4, humidity: 45, pressure: 1012 } } },
   ]);
 
   const [sysStats, setSysStats] = useState<SystemStats>({
@@ -63,7 +64,7 @@ const App: React.FC = () => {
           cpu: Math.random() * 30 + 5,
           temp: Math.random() * 10 + 40,
           npu: node.hat === 'AI_NPU' ? Math.random() * 100 : undefined,
-          iops: node.hat === 'SSD_NVME' ? Math.random() * 8000 + 2000 : undefined,
+          iops: node.hat === 'SSD_NVME' ? Math.random() * 8000 + 12000 : undefined,
         }
       })));
 

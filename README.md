@@ -1,57 +1,61 @@
 # 🚀 PiNet Web3 OS by Minima
 
-> **The definitive Web3-native operating system for Raspberry Pi 5 clusters. Decentralized, autonomous, and AI-orchestrated.**
+> **The ultimate decentralized operating system for Raspberry Pi 5 clusters. Powered by Minima and optimized for Agentic AI orchestration.**
 
 ---
 
 <p align="center">
   <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop" alt="PiNet OS Architecture" width="800" style="border-radius: 20px; box-shadow: 0 20px 50px rgba(197, 26, 74, 0.3);">
   <br>
-  <i>Hardware Cluster topology and sharding visualization generated via <b>Nano Banana Pro</b>.</i>
+  <i>Hardware Cluster topology visualized by <b>Nano Banana Pro</b> (Gemini 3 Pro Image).</i>
 </p>
 
-## ✨ The Vision
-**PiNet Web3 OS** is more than a Linux distribution; it's a sovereign node in the global DePIN economy. By combining the **Minima Protocol** for ultra-decentralization with a hybrid AI stack (**Google Gemini + Local AirLLM**), PiNet provides the infrastructure for truly autonomous agentic networks.
+## ✨ High-Level Vision
+**PiNet Web3 OS** transforms standard Raspberry Pi hardware into a sovereign decentralized compute unit. By combining the **Minima Protocol** for core decentralization with a hybrid AI stack (**Google Gemini + Local AirLLM**), we provide a "One-Click" solution for the emerging DePIN (Decentralized Physical Infrastructure) economy.
 
-## 🔥 Integrated Intelligence
+## 🔥 Key Intelligence Features
 
-### 🌬️ Hybrid AI Stack
-PiNet toggles seamlessly between cloud and local inference:
-- **Cloud (Gemini 3 Pro):** High-level architectural reasoning, visual hardware diagnostics, and 4K media generation.
-- **Local (AirLLM):** Distributed "Free Llama" inference. Models are sharded across your local Pi cluster nodes, ensuring 100% privacy and zero-cost execution for standard tasks.
+### 🧠 Hybrid AI Strategy
+PiNet intelligently routes requests between cloud and local providers:
+- **Cloud (Gemini 3 Pro):** Leverages `gemini-3-pro-preview` for complex reasoning, visual diagnostics, and 4K media synthesis.
+- **Local (AirLLM):** Executes "Free Llama" models locally. Inference is sharded across your Raspberry Pi cluster nodes for 100% private, zero-cost processing.
 
-### 🧠 Neural Thinking & Vision
-- **Thinking Mode:** Complex P2P routing and contract logic generation using `gemini-3-pro-preview`.
-- **Nano Banana Engine:** Generates real-time system documentation and visual assets directly from the shell.
-- **Maps Grounding:** Geographic peer discovery and network optimization.
+### 🌬️ Neural Thinking Mode
+- Advanced architectural reasoning with a **32,768 token thinking budget**.
+- Autonomous generation of **M.402 Agentic Payment** contracts.
+- Real-time troubleshooting of P2P network topology.
 
-## 🛠️ Core OS Architecture
+### 📍 Grounding & Search
+- Integrated `googleMaps` and `googleSearch` tools for real-time geographic and news-based awareness.
 
-| Feature | Description |
+## 🛠️ Operating System Architecture
+
+| Feature | Specification |
 | :--- | :--- |
-| **Decentralization** | Native Minima Protocol (Every Pi is a Full Node) |
-| **Messaging** | Maxima Transport Layer (End-to-end encrypted P2P) |
-| **Payments** | M.402 Agentic Protocol (Autonomous micro-payments for compute) |
-| **Clustering** | Automated PXE Provisioning for Alpha, Beta, and Gamma nodes |
-| **Storage** | NVMe SSD Sharding & Data Persistence Agents |
+| **Node Alpha** | **NVMe Storage Hub & Orchestrator:** High-IOPS persistence for cluster sharding. |
+| **Node Beta** | **Intelligence Hub (Hailo-8 NPU):** The dedicated Agentic Inference Gateway. |
+| **Node Gamma** | **Sensory Node (Sense HAT):** Environmental grounding and real-time telemetry. |
+| **Protocol** | Native Minima Layer 1 (Ultra-Decentralized) |
+| **Messaging** | Maxima Secure Information Transport |
+| **Payments** | M.402 Agentic Micro-Payment Streams |
 
 ## 🚀 DePAI Marketplace
-Deploy specialized agents to your cluster:
-- **AirLLM Worker:** Contributes to the local sharded inference pool.
-- **Environment Observer:** Fuses Sense Hat data with AI for proactive cooling/monitoring.
-- **Data Sharder:** Manages decentralized persistence across NVMe hats.
+Deploy specialized agents to your cluster to monetize hardware or automate maintenance:
+- **AirLLM Worker:** Contributes compute to the local LLM pool.
+- **Env Observer:** Uses Sense HAT data for proactive thermal management.
+- **Data Sharder:** Distributes encrypted data across Node Alpha's NVMe array.
 
 ---
 
-### 📥 Installation
-1. Flash the image using the **Pi Imager Portal**.
-2. Boot your primary node to initiate the **Setup Wizard**.
-3. Connect sub-nodes to auto-join the cluster via PXE discovery.
-4. Launch the **PiNet AI Assistant** to manage your decentralized stack.
+### 📥 Getting Started
+1. Flash the **PiNet Web3 OS** image using the official Pi Imager.
+2. Boot your Master Node (**Alpha**) to launch the **Setup Wizard**.
+3. Connect additional nodes via Ethernet to auto-join the cluster.
+4. Open the **PiNet AI Assistant** to manage your decentralized intelligence.
 
 ---
 
 <p align="center">
   <b>Decentralize your Hardware. Own your Intelligence.</b><br/>
-  <i>Developed for the Raspberry Pi 2024 Ecosystem.</i>
+  <i>Built for the Raspberry Pi Grant Competition 2024.</i>
 </p>

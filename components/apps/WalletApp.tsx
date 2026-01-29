@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const WalletApp: React.FC = () => {
@@ -24,8 +23,8 @@ const WalletApp: React.FC = () => {
         </div>
         <div className="flex justify-between items-end relative z-10">
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-white/50 uppercase mb-1">Node Address</span>
-            <div className="text-xs font-mono font-medium text-white/80 bg-black/20 px-3 py-1.5 rounded-lg border border-white/10">0x7471...F2E9</div>
+            <span className="text-[9px] font-bold text-white/50 uppercase mb-1">Minima Address</span>
+            <div className="text-xs font-mono font-medium text-white/80 bg-black/20 px-3 py-1.5 rounded-lg border border-white/10">Mx00A1...E94F</div>
           </div>
           <div className="flex gap-3">
             <button className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-2xl text-xs font-bold transition-all border border-white/20 active:scale-95">

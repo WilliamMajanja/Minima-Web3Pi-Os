@@ -11,7 +11,7 @@ type Mode = 'fast' | 'complex' | 'thinking' | 'maps';
 
 const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string; type?: 'text' | 'video' | 'image' }[]>([
-    { role: 'assistant', content: "Hello! I'm your PiNet OS intelligence. I can leverage Google's Cloud models or your Local AirLLM cluster nodes for free inference. How can I help?" }
+    { role: 'assistant', content: "PiNet Inference Gateway Active. I am the intelligence hub for your Beta Node. I orchestrate both Gemini cloud reasoning and local AirLLM shards through the Hailo-8 NPU. How shall we coordinate the cluster today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,12 +48,12 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
   const handleVeoGen = async () => {
     if (!input.trim() || isLoading) return;
     if (provider === 'airllm') {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Video generation is only supported on Gemini cloud providers." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Video generation is only supported on Gemini cloud providers via the Beta gateway." }]);
       return;
     }
     
     if (window.aistudio && !(await window.aistudio.hasSelectedApiKey())) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Veo generation requires a paid API key. Please use the button below to select one." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Veo generation requires a paid API key for the Beta node bridge." }]);
       return;
     }
 
@@ -66,7 +66,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
     if (videoUrl) {
       setMessages(prev => [...prev, { role: 'assistant', content: videoUrl, type: 'video' }]);
     } else {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Failed to generate video. Ensure your project has billing enabled." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Gateway Error: Failed to generate video. Ensure project billing is enabled." }]);
     }
     setIsLoading(false);
   };
@@ -80,7 +80,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
     const currentMedia = [...mediaToUpload];
     setMediaToUpload([]);
 
-    setMessages(prev => [...prev, { role: 'user', content: userText || "Analyzing media..." }]);
+    setMessages(prev => [...prev, { role: 'user', content: userText || "Analyzing cluster telemetry..." }]);
     setIsLoading(true);
 
     const response = await getAiResponse(userText, { 
@@ -92,36 +92,35 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
     });
 
     if (response === "ERROR_KEY_REQUIRED") {
-        setMessages(prev => [...prev, { role: 'assistant', content: "Advanced models require a paid API key. Click 'Select API Key' in settings." }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: "Beta Bridge: Advanced reasoning requires a paid API key in settings." }]);
     } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: response || "I couldn't process that request." }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: response || "Gateway Timeout: Neural uplink was not established." }]);
     }
     setIsLoading(false);
   };
 
   return (
     <div className="flex flex-col h-full bg-slate-900/50 backdrop-blur-sm relative">
-      {/* Provider & Mode Controls */}
       <div className="p-4 border-b border-white/5 flex flex-wrap gap-4 items-center bg-black/20">
         <div className="flex bg-white/5 rounded-lg p-1 border border-white/10 items-center gap-2">
-            <span className="text-[9px] font-bold text-slate-500 uppercase px-2">Provider</span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase px-2">Gateway</span>
             <button 
                 onClick={() => setProvider('gemini')}
                 className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${provider === 'gemini' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
             >
-                Gemini
+                Gemini Cloud
             </button>
             <button 
                 onClick={() => setProvider('airllm')}
                 className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${provider === 'airllm' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
             >
-                AirLLM
+                AirLLM Local
             </button>
         </div>
 
         {provider === 'gemini' && (
           <div className="flex bg-white/5 rounded-lg p-1 border border-white/10 items-center gap-1">
-             <span className="text-[9px] font-bold text-slate-500 uppercase px-2">Mode</span>
+             <span className="text-[9px] font-bold text-slate-500 uppercase px-2">NPU Mode</span>
             {(['fast', 'complex', 'thinking', 'maps'] as Mode[]).map(m => (
               <button
                 key={m}
@@ -153,7 +152,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
              onClick={() => window.aistudio.openSelectKey()}
              className="ml-auto px-3 py-1.5 bg-pink-600/20 border border-pink-500/40 text-pink-400 rounded-md text-[9px] font-bold uppercase tracking-widest hover:bg-pink-600 hover:text-white transition-all"
            >
-             Select API Key
+             Beta Bridge Key
            </button>
         )}
       </div>
@@ -169,7 +168,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
               {m.type === 'video' ? (
                 <div className="space-y-2">
                   <video src={m.content} controls className="w-full rounded-lg shadow-2xl border border-white/10" />
-                  <p className="text-[10px] text-slate-400 italic">Veo 3.1 Fast Generated Cluster Concept</p>
+                  <p className="text-[10px] text-slate-400 italic">Beta Node Render: Neural UI Transition</p>
                 </div>
               ) : m.content.startsWith('http') && m.type === 'image' ? (
                 <img src={m.content} className="max-w-full rounded-lg" />
@@ -190,7 +189,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
                 <div className={`w-2 h-2 ${provider === 'airllm' ? 'bg-emerald-500' : 'bg-purple-500'} rounded-full animate-bounce [animation-delay:-0.3s]`} />
               </div>
               <span className={`text-[9px] font-mono ${provider === 'airllm' ? 'text-emerald-400' : 'text-purple-400'} animate-pulse tracking-widest uppercase`}>
-                  {provider === 'airllm' ? 'Local Cluster Sharding & Inference...' : 'Initializing Neural Reasoning...'}
+                  {provider === 'airllm' ? 'Beta Node: Sharding Local Inference...' : 'Beta Node: Routing to Gemini Cloud Gateway...'}
               </span>
             </div>
           </div>
@@ -235,7 +234,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
             <div className="relative flex-1">
                 <input
                 className={`w-full glass-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors pr-12 ${provider === 'airllm' ? 'focus:border-emerald-500/50' : 'focus:border-purple-500/50'}`}
-                placeholder={provider === 'airllm' ? "Asking local Llama cluster..." : "Querying Gemini cloud..."}
+                placeholder={provider === 'airllm' ? "Routing local inference via Beta NPU..." : "Routing cloud request via Beta Bridge..."}
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 />
@@ -244,7 +243,7 @@ const AiAssistantApp: React.FC<AiAssistantAppProps> = ({ context }) => {
                       type="button"
                       onClick={handleVeoGen}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-pink-500 hover:text-pink-400 transition-colors p-1"
-                      title="Generate Veo Video"
+                      title="Beta Node Render"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     </button>
