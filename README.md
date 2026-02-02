@@ -57,5 +57,5 @@ Deploy specialized agents to your cluster to monetize hardware or automate maint
 
 <p align="center">
   <b>Decentralize your Hardware. Own your Intelligence.</b><br/>
-  <i>Built for the Raspberry Pi Grant Competition 2024.</i>
+  <i>Built for the Raspberry Pi Grant Community.</i>
 </p>
