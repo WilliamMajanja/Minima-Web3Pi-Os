@@ -11,10 +11,15 @@ interface TerminalLine {
 
 const TerminalApp: React.FC = () => {
   const [history, setHistory] = useState<TerminalLine[]>([
-    { text: 'PiNet Web3 OS Shell [Version 1.0.35]', type: 'header' },
-    { text: '(c) 2024 Minima Global. Decentralized Node Environment.', type: 'info' },
-    { text: `Current User: ${shell.getUser()}`, type: 'info' },
-    { text: 'Type "help" to see available commands.', type: 'info' },
+    { text: 'Linux raspberrypi 6.5.0-rpi-v8 #1 SMP PREEMPT Debian 13 (trixie) aarch64', type: 'info' },
+    { text: '', type: 'info' },
+    { text: 'The programs included with the Debian GNU/Linux system are free software;', type: 'info' },
+    { text: 'the exact distribution terms for each program are described in the', type: 'info' },
+    { text: 'individual files in /usr/share/doc/*/copyright.', type: 'info' },
+    { text: '', type: 'info' },
+    { text: 'Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent', type: 'info' },
+    { text: 'permitted by applicable law.', type: 'info' },
+    { text: `Last login: ${new Date().toString().split(' (')[0]}`, type: 'info' },
     { text: '', type: 'info' }
   ]);
   const [input, setInput] = useState('');
@@ -25,6 +30,21 @@ const TerminalApp: React.FC = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [history]);
+
+  const getPrompt = () => {
+    const user = shell.getUser();
+    const path = shell.getCurrentPath();
+    const home = `/home/${user}`;
+    
+    let displayPath = path;
+    if (path === home) {
+        displayPath = '~';
+    } else if (path.startsWith(home + '/')) {
+        displayPath = '~' + path.slice(home.length);
+    }
+    
+    return `${user}@raspberrypi:${displayPath}$`;
+  };
 
   const handleCommand = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +58,7 @@ const TerminalApp: React.FC = () => {
     }
 
     const promptLine: TerminalLine = { 
-        text: `${shell.getUser()}@raspberrypi:${shell.getCurrentPath()}$ ${rawInput}`, 
+        text: `${getPrompt()} ${rawInput}`, 
         type: 'prompt' 
     };
     
@@ -51,33 +71,34 @@ const TerminalApp: React.FC = () => {
   const getLineStyles = (type: LineType) => {
     switch (type) {
       case 'header': return 'text-white font-bold tracking-tight border-l-2 border-white/20 pl-2 my-1';
-      case 'prompt': return 'text-blue-400 font-bold';
-      case 'info': return 'text-slate-400';
+      case 'prompt': return 'text-emerald-400 font-bold';
+      case 'info': return 'text-slate-300';
       case 'success': return 'text-emerald-400';
-      case 'error': return 'text-rose-400 font-medium italic';
+      case 'error': return 'text-rose-400 font-medium';
       case 'warning': return 'text-amber-400 italic';
-      case 'code': return 'text-indigo-400 bg-indigo-500/5 px-1 rounded font-mono';
+      case 'code': return 'text-indigo-300 bg-white/5 px-1 rounded font-mono';
       default: return 'text-slate-300';
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#020617] font-mono text-xs sm:text-sm p-6 overflow-hidden">
-      <div ref={scrollRef} className="flex-1 overflow-auto space-y-1 relative z-10 selection:bg-blue-500/30">
+    <div className="flex flex-col h-full bg-[#0c0c0c] font-mono text-xs sm:text-sm p-4 overflow-hidden" onClick={() => document.getElementById('term-input')?.focus()}>
+      <div ref={scrollRef} className="flex-1 overflow-auto space-y-0.5 relative z-10 selection:bg-white/20">
         {history.map((line, i) => (
-          <div key={i} className={`whitespace-pre-wrap leading-relaxed animate-in fade-in slide-in-from-left-1 ${getLineStyles(line.type)}`}>
+          <div key={i} className={`whitespace-pre-wrap leading-tight break-words ${getLineStyles(line.type)}`}>
             {line.text}
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleCommand} className="mt-4 flex gap-2 border-t border-white/5 pt-4 group relative z-10">
-        <span className="text-blue-400 shrink-0 font-bold select-none">
-            {shell.getUser()}@raspberrypi:{shell.getCurrentPath()}$
+      <form onSubmit={handleCommand} className="mt-2 flex gap-0 group relative z-10">
+        <span className="text-emerald-400 shrink-0 font-bold select-none mr-2">
+            {getPrompt()}
         </span>
         <input 
+          id="term-input"
           autoFocus
-          className="flex-1 bg-transparent border-none outline-none text-white caret-pink-500"
+          className="flex-1 bg-transparent border-none outline-none text-white caret-slate-400"
           value={input}
           onChange={e => setInput(e.target.value)}
           spellCheck={false}

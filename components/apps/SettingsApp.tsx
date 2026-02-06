@@ -1,12 +1,37 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { settingsService } from '../../services/settingsService';
 
 const SettingsApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('system');
-  const [nodeAlias, setNodeAlias] = useState('Pi-Alpha-Node');
+  const [nodeAlias, setNodeAlias] = useState(settingsService.nodeAlias);
   const [p2pEnabled, setP2pEnabled] = useState(true);
-  const [torEnabled, setTorEnabled] = useState(false);
-  const [wallpaper, setWallpaper] = useState('carbon');
+  const [torEnabled, setTorEnabled] = useState(settingsService.torEnabled);
+  const [wallpaper, setWallpaper] = useState(settingsService.wallpaper);
+
+  useEffect(() => {
+    const unsub = settingsService.subscribe(() => {
+        setWallpaper(settingsService.wallpaper);
+        setNodeAlias(settingsService.nodeAlias);
+        setTorEnabled(settingsService.torEnabled);
+    });
+    return unsub;
+  }, []);
+
+  const handleWallpaperChange = (w: string) => {
+      settingsService.setWallpaper(w);
+  };
+
+  const handleAliasChange = (v: string) => {
+      setNodeAlias(v);
+      settingsService.setNodeAlias(v);
+  };
+
+  const handleTorChange = () => {
+      const newVal = !torEnabled;
+      setTorEnabled(newVal);
+      settingsService.setTorEnabled(newVal);
+  };
 
   return (
     <div className="flex h-full bg-slate-900/40">
@@ -23,7 +48,7 @@ const SettingsApp: React.FC = () => {
         {activeTab === 'system' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <Section title="Node Identity">
-                    <Input label="Node Alias" value={nodeAlias} onChange={(e) => setNodeAlias(e.target.value)} />
+                    <Input label="Node Alias" value={nodeAlias} onChange={(e: any) => handleAliasChange(e.target.value)} />
                     <p className="text-[10px] text-slate-500 mt-2">This alias is broadcast to peers on the Minima network.</p>
                 </Section>
                 <Section title="Power Management">
@@ -70,10 +95,10 @@ const SettingsApp: React.FC = () => {
              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <Section title="Desktop Appearance">
                     <div className="grid grid-cols-2 gap-4">
-                        <WallpaperOption label="Carbon Fibre" active={wallpaper === 'carbon'} onClick={() => setWallpaper('carbon')} />
-                        <WallpaperOption label="Neon City" active={wallpaper === 'neon'} onClick={() => setWallpaper('neon')} />
-                        <WallpaperOption label="Deep Space" active={wallpaper === 'space'} onClick={() => setWallpaper('space')} />
-                        <WallpaperOption label="Abstract Mesh" active={wallpaper === 'mesh'} onClick={() => setWallpaper('mesh')} />
+                        <WallpaperOption label="Carbon Fibre" active={wallpaper === 'carbon'} onClick={() => handleWallpaperChange('carbon')} />
+                        <WallpaperOption label="Neon City" active={wallpaper === 'neon'} onClick={() => handleWallpaperChange('neon')} />
+                        <WallpaperOption label="Deep Space" active={wallpaper === 'space'} onClick={() => handleWallpaperChange('space')} />
+                        <WallpaperOption label="Abstract Mesh" active={wallpaper === 'mesh'} onClick={() => handleWallpaperChange('mesh')} />
                     </div>
                 </Section>
                 <Section title="Interface">
@@ -86,7 +111,7 @@ const SettingsApp: React.FC = () => {
         {activeTab === 'security' && (
              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <Section title="Privacy">
-                    <Toggle label="Route via Tor" checked={torEnabled} onChange={() => setTorEnabled(!torEnabled)} />
+                    <Toggle label="Route via Tor" checked={torEnabled} onChange={handleTorChange} />
                     <p className="text-[10px] text-slate-500 mt-2">Anonymize all node traffic through the Tor network (Latency will increase).</p>
                     <div className="mt-4">
                         <Toggle label="Share Telemetry" checked={true} />

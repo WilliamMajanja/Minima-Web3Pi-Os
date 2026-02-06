@@ -1,12 +1,22 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
+import { minimaService } from '../../services/minimaService';
 
 const WalletApp: React.FC = () => {
-  const transactions = [
-    { id: 1, type: 'M.402 Burn', amount: '-0.42 MIN', date: 'Just now', status: 'Agent: Llama-3-Pi' },
-    { id: 2, type: 'Received', amount: '+42.50 MIN', date: '2024-05-20', status: 'Confirmed' },
-    { id: 3, type: 'Sent', amount: '-10.00 MIN', date: '2024-05-18', status: 'Confirmed' },
-    { id: 4, type: 'Staking Reward', amount: '+0.15 MIN', date: '2024-05-17', status: 'Confirmed' },
-  ];
+  const [balance, setBalance] = useState(minimaService.balance);
+  const [transactions, setTransactions] = useState(minimaService.transactions);
+
+  useEffect(() => {
+    // Initial sync
+    setBalance(minimaService.balance);
+    setTransactions(minimaService.transactions);
+
+    const unsub = minimaService.subscribe(() => {
+        setBalance(minimaService.balance);
+        setTransactions([...minimaService.transactions]);
+    });
+    return unsub;
+  }, []);
 
   return (
     <div className="p-8 h-full flex flex-col gap-8 overflow-y-auto">
@@ -17,7 +27,7 @@ const WalletApp: React.FC = () => {
         <div className="relative z-10">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Mainnet Assets</span>
           <div className="text-5xl font-bold text-white mt-2 flex items-baseline gap-2">
-            1,250.45 
+            {balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             <span className="text-xl font-medium opacity-60">MIN</span>
           </div>
         </div>

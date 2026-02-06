@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { NodeStats, SystemStats } from '../types';
 
 interface TopBarProps {
   nodeStats: NodeStats;
   systemStats: SystemStats;
+  onSwitchOS?: () => void;
+  currentOS?: 'pinet' | 'raspbian';
 }
 
-const TopBar: React.FC<TopBarProps> = ({ nodeStats, systemStats }) => {
+const TopBar: React.FC<TopBarProps> = ({ nodeStats, systemStats, onSwitchOS, currentOS }) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -37,6 +40,16 @@ const TopBar: React.FC<TopBarProps> = ({ nodeStats, systemStats }) => {
       </div>
 
       <div className="flex items-center gap-4 text-xs font-medium">
+        {onSwitchOS && (
+            <button 
+                onClick={onSwitchOS}
+                className="hidden sm:flex items-center gap-2 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-300 transition-all hover:scale-105 active:scale-95"
+            >
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><path d="M12 4v16"></path><path d="M4 12h16"></path></svg>
+                Switch OS
+            </button>
+        )}
+
         <div className="hidden sm:flex items-center gap-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
           <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-help" title="System Load">
             <svg className="w-3 h-3 text-pink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>

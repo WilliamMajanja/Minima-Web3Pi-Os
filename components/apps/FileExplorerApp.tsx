@@ -1,25 +1,47 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { shell } from '../../services/shellService';
+import { VFSNode } from '../../types';
 
 const FileExplorerApp: React.FC = () => {
   const [currentPath, setCurrentPath] = useState(shell.getCurrentPath());
-  
-  // For the demo, we just get a static directory list from the current path
-  const nodes = [
-    { name: 'bin', type: 'dir', modified: '2024-05-22', size: '--' },
-    { name: 'etc', type: 'dir', modified: '2024-05-22', size: '--' },
-    { name: 'home', type: 'dir', modified: '2024-05-22', size: '--' },
-    { name: 'var', type: 'dir', modified: '2024-05-22', size: '--' },
-    { name: 'README.md', type: 'file', modified: '2024-05-21', size: '2KB' },
-    { name: 'minima.conf', type: 'file', modified: '2024-05-22', size: '1KB' },
-  ];
+  const [nodes, setNodes] = useState<VFSNode[]>([]);
+
+  useEffect(() => {
+    updateView();
+  }, [currentPath]);
+
+  const updateView = () => {
+      const dir = shell.resolvePath(currentPath);
+      if (dir && dir.children) {
+          setNodes(dir.children);
+      } else {
+          setNodes([]);
+      }
+  };
+
+  const navigate = (folderName: string) => {
+      const newPath = currentPath === '/' ? `/${folderName}` : `${currentPath}/${folderName}`;
+      // In a real app we'd verify it exists first, but shell logic is simple
+      setCurrentPath(newPath);
+  };
+
+  const goUp = () => {
+      if (currentPath === '/') return;
+      const parts = currentPath.split('/').filter(Boolean);
+      parts.pop();
+      setCurrentPath('/' + parts.join('/'));
+  };
 
   return (
     <div className="flex h-full flex-col bg-slate-900/40">
       <div className="flex items-center gap-4 p-4 border-b border-white/5 bg-black/20">
         <div className="flex gap-2">
-            <button className="p-2 hover:bg-white/5 rounded-lg text-slate-400 transition-colors">
+            <button 
+                onClick={goUp}
+                disabled={currentPath === '/'}
+                className="p-2 hover:bg-white/5 rounded-lg text-slate-400 transition-colors disabled:opacity-30"
+            >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             </button>
             <button className="p-2 hover:bg-white/5 rounded-lg text-slate-400 transition-colors">
@@ -45,8 +67,25 @@ const FileExplorerApp: React.FC = () => {
                 </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
+                {currentPath !== '/' && (
+                    <tr onClick={goUp} className="hover:bg-white/5 transition-colors cursor-pointer group">
+                        <td className="py-3 pl-4 flex items-center gap-3">
+                            <div className="text-slate-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                            </div>
+                            <span className="text-white font-medium group-hover:text-blue-400 transition-colors">..</span>
+                        </td>
+                        <td className="py-3 font-mono opacity-60 uppercase">DIR</td>
+                        <td className="py-3 opacity-60"></td>
+                        <td className="py-3 opacity-60 font-mono"></td>
+                    </tr>
+                )}
                 {nodes.map((node, i) => (
-                    <tr key={i} className="hover:bg-white/5 transition-colors cursor-pointer group">
+                    <tr 
+                        key={i} 
+                        onClick={() => node.type === 'dir' && navigate(node.name)}
+                        className="hover:bg-white/5 transition-colors cursor-pointer group"
+                    >
                         <td className="py-3 pl-4 flex items-center gap-3">
                             <div className={node.type === 'dir' ? 'text-blue-400' : 'text-slate-400'}>
                                 {node.type === 'dir' ? (
@@ -58,8 +97,8 @@ const FileExplorerApp: React.FC = () => {
                             <span className="text-white font-medium group-hover:text-blue-400 transition-colors">{node.name}</span>
                         </td>
                         <td className="py-3 font-mono opacity-60 uppercase">{node.type}</td>
-                        <td className="py-3 opacity-60">{node.modified}</td>
-                        <td className="py-3 opacity-60 font-mono">{node.size}</td>
+                        <td className="py-3 opacity-60">{new Date(node.modified).toLocaleDateString()}</td>
+                        <td className="py-3 opacity-60 font-mono">{node.size ? node.size.toLocaleString() : '--'}</td>
                     </tr>
                 ))}
             </tbody>

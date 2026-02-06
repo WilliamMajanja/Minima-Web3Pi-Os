@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ClusterNode, M402Session } from '../../types';
-import { MinimaService } from '../../services/minimaService';
+import { minimaService } from '../../services/minimaService';
 
 interface DePAiExecutorProps {
   nodes: ClusterNode[];
@@ -47,7 +47,8 @@ const DePAiExecutor: React.FC<DePAiExecutorProps> = ({ nodes }) => {
     setActiveTask(task.name);
     setOutput(prev => [...prev, `[INIT] Deploying ${task.name}...`, `[M.402] Establishing Stream: ${task.rate} MIN/sec...`]);
     
-    const sessionId = await MinimaService.initiateM402Stream(task.rate);
+    // In a real app we'd await confirmation, but for UI responsiveness we do it immediately
+    const sessionId = await minimaService.initiateM402Stream(task.rate);
     const newSession: M402Session = { 
       sessionId, 
       ratePerSecond: task.rate, 
@@ -61,7 +62,7 @@ const DePAiExecutor: React.FC<DePAiExecutorProps> = ({ nodes }) => {
   };
 
   const terminateSession = async (sessionId: string) => {
-    await MinimaService.stopM402Stream(sessionId);
+    await minimaService.stopM402Stream(sessionId);
     const sessionToStop = activeSessions.find(s => s.sessionId === sessionId);
     
     setOutput(prev => [
@@ -77,6 +78,14 @@ const DePAiExecutor: React.FC<DePAiExecutorProps> = ({ nodes }) => {
   useEffect(() => {
     if (activeSessions.length > 0) {
       const timer = setInterval(() => {
+        // Calculate burn
+        const totalBurn = activeSessions.reduce((acc, s) => acc + s.ratePerSecond, 0);
+        
+        // Actually burn tokens in the wallet service
+        if (totalBurn > 0) {
+            minimaService.burn(totalBurn, `DePAI: ${activeTask || 'Cluster Task'}`);
+        }
+
         setActiveSessions(prev => prev.map(s => ({
             ...s,
             totalBurned: s.totalBurned + s.ratePerSecond
@@ -88,7 +97,7 @@ const DePAiExecutor: React.FC<DePAiExecutorProps> = ({ nodes }) => {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [activeSessions.length]);
+  }, [activeSessions.length, activeTask]);
 
   return (
     <div className="flex h-full overflow-hidden">

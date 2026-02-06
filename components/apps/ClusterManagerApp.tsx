@@ -1,26 +1,39 @@
 
 import React, { useState } from 'react';
 import { ClusterNode } from '../../types';
+import { clusterService } from '../../services/clusterService';
 
 interface ClusterManagerAppProps {
   nodes: ClusterNode[];
 }
 
 const ClusterManagerApp: React.FC<ClusterManagerAppProps> = ({ nodes }) => {
-  const [provisioningId, setProvisioningId] = useState<string | null>(null);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   const startProvisioning = (id: string) => {
-    setProvisioningId(id);
-    setTimeout(() => setProvisioningId(null), 5000);
+    clusterService.provisionNode(id);
   };
 
   const toggleBroadcast = () => {
     setIsBroadcasting(!isBroadcasting);
+    if (!isBroadcasting) {
+        // Simulate finding nodes after a delay if in broadcast mode
+        setTimeout(() => {
+            clusterService.addNode({ 
+                id: 'n2', 
+                name: 'Pi-Beta (AI Hub)', 
+                ip: '192.168.1.11', 
+                hat: 'AI_NPU', 
+                status: 'awaiting-os', 
+                metrics: { cpu: 2, ram: 0.5, temp: 35, npu: 0 } 
+            });
+        }, 3000);
+    }
   };
 
   return (
-    <div className="p-8 h-full space-y-8 overflow-y-auto">
+    <div className="p-8 h-full space-y-8 overflow-y-auto relative">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#C51A4A] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-900/20 border border-white/10">
@@ -32,6 +45,13 @@ const ClusterManagerApp: React.FC<ClusterManagerAppProps> = ({ nodes }) => {
           </div>
         </div>
         <div className="flex gap-3">
+           <button
+              onClick={() => setShowGuide(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all"
+           >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              Setup Guide
+           </button>
            <button 
               onClick={toggleBroadcast}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg active:scale-95 ${isBroadcasting ? 'bg-emerald-600 animate-pulse' : 'bg-white/5 border border-white/10 text-slate-300'}`}
@@ -51,7 +71,7 @@ const ClusterManagerApp: React.FC<ClusterManagerAppProps> = ({ nodes }) => {
           <NodeCard 
             key={node.id} 
             node={node} 
-            isProvisioning={provisioningId === node.id} 
+            isProvisioning={node.status === 'provisioning'} 
             onProvision={() => startProvisioning(node.id)} 
             isBroadcastMode={isBroadcasting}
           />
@@ -129,9 +149,84 @@ const ClusterManagerApp: React.FC<ClusterManagerAppProps> = ({ nodes }) => {
             </div>
         </div>
       </div>
+
+      {showGuide && (
+        <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl z-50 p-8 flex flex-col animate-in fade-in duration-300">
+           <div className="flex justify-between items-start mb-6 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <div>
+                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Raspberry Pi Cluster Setup</h2>
+                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Official Hardware Guide</p>
+                </div>
+              </div>
+              <button onClick={() => setShowGuide(false)} className="p-3 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-all">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto pr-2 pb-8">
+              <div className="space-y-6">
+                 <GuideStep number="1" title="Hardware Assembly">
+                    <p>Stack your Raspberry Pi 5 units using brass standoffs or a cluster case. Connect all units to a Gigabit Ethernet Switch using CAT6 cables.</p>
+                    <ul className="list-disc list-inside mt-3 text-slate-400 text-xs space-y-2 font-medium bg-black/20 p-4 rounded-xl border border-white/5">
+                        <li><strong className="text-white">Node Alpha (Master):</strong> Requires NVMe Base + 500GB+ SSD. This is your main controller.</li>
+                        <li><strong className="text-white">Nodes Beta/Gamma (Workers):</strong> No storage required. They will boot over the network (PXE).</li>
+                        <li><strong className="text-white">Power:</strong> Ensure 5V/5A supply for each unit (Official Pi 27W PSU recommended).</li>
+                    </ul>
+                 </GuideStep>
+                 <GuideStep number="2" title="Network Boot Configuration">
+                    <p>PiNet uses PXE (Preboot Execution Environment) to deploy the OS to worker nodes seamlessly.</p>
+                    <div className="mt-3 p-4 bg-black/40 rounded-xl font-mono text-[10px] text-emerald-400 border border-white/10 shadow-inner">
+                        <div className="opacity-50 mb-2 border-b border-white/10 pb-1"># On Worker Nodes (No SD Card inserted):</div>
+                        <div className="mb-1">1. Power on Pi without SD card or NVMe.</div>
+                        <div className="mb-1">2. Bootloader defaults to Network Boot mode.</div>
+                        <div className="mb-1">3. Wait for "Link Up" LED on ethernet port.</div>
+                        <div className="mb-1 opacity-70">4. Diagnostic screen will show "DHCP/BOOTP...".</div>
+                    </div>
+                 </GuideStep>
+              </div>
+              <div className="space-y-6">
+                 <GuideStep number="3" title="Master Node Provisioning">
+                    <p>This device (Alpha) acts as the DHCP & TFTP server for the cluster subnet.</p>
+                    <ul className="list-disc list-inside mt-3 text-slate-400 text-xs space-y-2 font-medium bg-black/20 p-4 rounded-xl border border-white/5">
+                        <li>Static IP configured: <code className="bg-white/10 px-1 py-0.5 rounded text-white">192.168.1.10</code></li>
+                        <li>Subnet Mask: <code className="bg-white/10 px-1 py-0.5 rounded text-white">255.255.255.0</code></li>
+                        <li>Gateway: <code className="bg-white/10 px-1 py-0.5 rounded text-white">192.168.1.1</code></li>
+                    </ul>
+                 </GuideStep>
+                 <GuideStep number="4" title="Cluster Discovery & Init">
+                    <p>Once hardware is powered and connected:</p>
+                    <ol className="list-decimal list-inside mt-3 text-slate-400 text-xs space-y-3 font-medium bg-black/20 p-4 rounded-xl border border-white/5">
+                        <li>Click <strong className="text-white bg-emerald-600/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">Broadcast OS to Network</strong> in the top right of this app.</li>
+                        <li>PiNet Alpha will broadcast the kernel image via TFTP.</li>
+                        <li>Worker nodes will appear in the dashboard with status <strong className="text-amber-400">"Awaiting OS"</strong>.</li>
+                        <li>Click <strong className="text-white border border-white/20 px-1.5 py-0.5 rounded">Provision</strong> on each card to finalize their role.</li>
+                    </ol>
+                 </GuideStep>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
+
+const GuideStep = ({ number, title, children }: any) => (
+    <div className="glass p-6 rounded-3xl border border-white/5 shadow-xl">
+        <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-600 to-pink-800 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-pink-900/40 border border-white/10">
+                {number}
+            </div>
+            <h3 className="font-bold text-white uppercase tracking-wide text-sm">{title}</h3>
+        </div>
+        <div className="text-sm text-slate-300 leading-relaxed pl-[3.5rem]">
+            {children}
+        </div>
+    </div>
+);
 
 const TopologyNode = ({ label, color, glow }: { label: string; color: string; glow: string }) => (
     <div className={`w-14 h-14 rounded-2xl bg-slate-900 border-2 ${color} ${glow} flex items-center justify-center text-white text-lg font-bold shadow-2xl transition-transform hover:scale-110 cursor-pointer`}>
@@ -165,7 +260,12 @@ const NodeCard: React.FC<NodeCardProps> = ({ node, isProvisioning, onProvision, 
                     <div className="w-12 h-12 bg-emerald-500 rounded-full animate-ping mb-4 opacity-50" />
                     <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Found New Node</div>
                     <div className="text-[10px] text-emerald-300 opacity-60">Waiting for PXE handshake...</div>
-                    <button className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg text-[9px] font-bold uppercase">Flash Web3PiOS</button>
+                    <button 
+                        onClick={onProvision}
+                        className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[9px] font-bold uppercase transition-colors"
+                    >
+                        Flash Web3PiOS
+                    </button>
                 </div>
             )}
 
@@ -200,9 +300,10 @@ const NodeCard: React.FC<NodeCardProps> = ({ node, isProvisioning, onProvision, 
                 ) : (
                     <button 
                         onClick={onProvision}
-                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all active:scale-95"
+                        disabled={node.status !== 'online' && node.status !== 'awaiting-os'}
+                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all active:scale-95 disabled:opacity-50"
                     >
-                        Provision Node
+                        {node.status === 'online' ? 'Re-Provision Node' : 'Provision Node'}
                     </button>
                 )}
             </div>
