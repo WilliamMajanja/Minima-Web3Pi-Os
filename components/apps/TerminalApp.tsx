@@ -68,6 +68,45 @@ const TerminalApp: React.FC = () => {
     setInput('');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      
+      const commands = [
+        'ls', 'cd', 'pwd', 'cat', 'mkdir', 'touch', 'whoami', 'uname', 
+        'clear', 'neofetch', 'apt', 'sudo', 'reboot', 'minima', 'cluster', 'top', 'help'
+      ];
+      
+      const currentInput = input;
+      // Only complete command if it's the start
+      if (!currentInput.includes(' ') && currentInput.length > 0) {
+          const matches = commands.filter(cmd => cmd.startsWith(currentInput));
+          
+          if (matches.length === 1) {
+              setInput(matches[0] + ' ');
+          } else if (matches.length > 1) {
+              // Calculate common prefix
+              const commonPrefix = matches.reduce((acc, str) => {
+                  let i = 0;
+                  while (i < acc.length && i < str.length && acc[i] === str[i]) i++;
+                  return acc.slice(0, i);
+              }, matches[0]);
+
+              if (commonPrefix.length > currentInput.length) {
+                  setInput(commonPrefix);
+              } else {
+                  // If we are already at common prefix, list options
+                  setHistory(prev => [
+                      ...prev,
+                      { text: `${getPrompt()} ${currentInput}`, type: 'prompt' },
+                      { text: matches.join('  '), type: 'info' }
+                  ]);
+              }
+          }
+      }
+    }
+  };
+
   const getLineStyles = (type: LineType) => {
     switch (type) {
       case 'header': return 'text-white font-bold tracking-tight border-l-2 border-white/20 pl-2 my-1';
@@ -101,6 +140,7 @@ const TerminalApp: React.FC = () => {
           className="flex-1 bg-transparent border-none outline-none text-white caret-slate-400"
           value={input}
           onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           spellCheck={false}
           autoComplete="off"
         />
