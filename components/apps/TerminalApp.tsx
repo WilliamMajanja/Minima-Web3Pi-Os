@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { shell } from '../../services/shellService';
 
-type LineType = 'header' | 'prompt' | 'info' | 'success' | 'error' | 'command' | 'code' | 'warning';
+type LineType = 'header' | 'prompt' | 'info' | 'success' | 'error' | 'command' | 'code' | 'warning' | 'ascii';
 
 interface TerminalLine {
   text: string;
@@ -11,7 +11,7 @@ interface TerminalLine {
 
 const TerminalApp: React.FC = () => {
   const [history, setHistory] = useState<TerminalLine[]>([
-    { text: 'Linux raspberrypi 6.5.0-rpi-v8 #1 SMP PREEMPT Debian 13 (trixie) aarch64', type: 'info' },
+    { text: 'Linux raspberrypi 6.6.20+rpt-rpi-v8 #1 SMP PREEMPT Debian 12 (bookworm) aarch64', type: 'info' },
     { text: '', type: 'info' },
     { text: 'The programs included with the Debian GNU/Linux system are free software;', type: 'info' },
     { text: 'the exact distribution terms for each program are described in the', type: 'info' },
@@ -20,16 +20,28 @@ const TerminalApp: React.FC = () => {
     { text: 'Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent', type: 'info' },
     { text: 'permitted by applicable law.', type: 'info' },
     { text: `Last login: ${new Date().toString().split(' (')[0]}`, type: 'info' },
+    { text: '', type: 'info' },
+    { text: "Type 'help' to see a list of available commands.", type: 'success' },
     { text: '', type: 'info' }
   ]);
   const [input, setInput] = useState('');
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll to bottom on history change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [history]);
+
+  // Focus input on mount and click
+  useEffect(() => {
+      inputRef.current?.focus();
+  }, []);
 
   const getPrompt = () => {
     const user = shell.getUser();
@@ -51,6 +63,10 @@ const TerminalApp: React.FC = () => {
     const rawInput = input.trim();
     if (!rawInput) return;
 
+    // Add to command history
+    setCommandHistory(prev => [...prev, rawInput]);
+    setHistoryIndex(-1);
+
     if (rawInput === 'clear') {
         setHistory([]);
         setInput('');
@@ -62,9 +78,16 @@ const TerminalApp: React.FC = () => {
         type: 'prompt' 
     };
     
+    // Execute command via Shell Service
     const result = shell.execute(rawInput);
     
-    setHistory(prev => [...prev, promptLine, ...result.output]);
+    // Transform shell result types to local TerminalLine types if needed
+    const outputLines: TerminalLine[] = result.output.map(line => ({
+        text: line.text,
+        type: line.type as LineType
+    }));
+
+    setHistory(prev => [...prev, promptLine, ...outputLines]);
     setInput('');
   };
 
@@ -104,6 +127,25 @@ const TerminalApp: React.FC = () => {
               }
           }
       }
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (commandHistory.length > 0) {
+            const newIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
+            setHistoryIndex(newIndex);
+            setInput(commandHistory[newIndex]);
+        }
+    } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyIndex !== -1) {
+            const newIndex = historyIndex + 1;
+            if (newIndex < commandHistory.length) {
+                setHistoryIndex(newIndex);
+                setInput(commandHistory[newIndex]);
+            } else {
+                setHistoryIndex(-1);
+                setInput('');
+            }
+        }
     }
   };
 
@@ -116,15 +158,19 @@ const TerminalApp: React.FC = () => {
       case 'error': return 'text-rose-400 font-medium';
       case 'warning': return 'text-amber-400 italic';
       case 'code': return 'text-indigo-300 bg-white/5 px-1 rounded font-mono';
+      case 'ascii': return 'text-emerald-400 font-bold leading-none tracking-tighter';
       default: return 'text-slate-300';
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0c0c0c] font-mono text-xs sm:text-sm p-4 overflow-hidden" onClick={() => document.getElementById('term-input')?.focus()}>
-      <div ref={scrollRef} className="flex-1 overflow-auto space-y-0.5 relative z-10 selection:bg-white/20">
+    <div 
+      className="flex flex-col h-full bg-[#0c0c0c] font-mono text-xs sm:text-sm p-4 overflow-hidden" 
+      onClick={() => inputRef.current?.focus()}
+    >
+      <div ref={scrollRef} className="flex-1 overflow-auto space-y-0.5 relative z-10 selection:bg-white/20 scrollbar-hide">
         {history.map((line, i) => (
-          <div key={i} className={`whitespace-pre-wrap leading-tight break-words ${getLineStyles(line.type)}`}>
+          <div key={i} className={`whitespace-pre-wrap break-words ${getLineStyles(line.type)}`}>
             {line.text}
           </div>
         ))}
@@ -135,9 +181,9 @@ const TerminalApp: React.FC = () => {
             {getPrompt()}
         </span>
         <input 
-          id="term-input"
+          ref={inputRef}
           autoFocus
-          className="flex-1 bg-transparent border-none outline-none text-white caret-slate-400"
+          className="flex-1 bg-transparent border-none outline-none text-white caret-slate-400 placeholder-white/20"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}

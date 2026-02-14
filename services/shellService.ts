@@ -35,7 +35,7 @@ class ShellService {
             { 
               name: 'os-release', 
               type: 'file', 
-              content: `PRETTY_NAME="Debian GNU/Linux 13 (trixie)"\nNAME="Debian GNU/Linux"\nVERSION_CODENAME=trixie\nID=debian\nHOME_URL="https://www.debian.org/"\nSUPPORT_URL="https://www.debian.org/support"\nBUG_REPORT_URL="https://bugs.debian.org/"`, 
+              content: `PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"\nNAME="Debian GNU/Linux"\nVERSION_CODENAME=bookworm\nID=debian\nHOME_URL="https://www.debian.org/"\nSUPPORT_URL="https://www.debian.org/support"\nBUG_REPORT_URL="https://bugs.debian.org/"`, 
               modified: Date.now(), 
               permissions: '-rw-r--r--' 
             },
@@ -312,9 +312,9 @@ class ShellService {
 
       case 'uname':
         if (args[0] === '-a') {
-          output.push({ text: 'Linux raspberrypi 6.5.0-rpi-v8 #1 SMP PREEMPT Debian 13 (trixie) aarch64 GNU/Linux', type: 'info' });
+          output.push({ text: 'Linux raspberrypi 6.6.20+rpt-rpi-v8 #1 SMP PREEMPT Debian 12 (bookworm) aarch64 GNU/Linux', type: 'info' });
         } else if (args[0] === '-r') {
-           output.push({ text: '6.5.0-rpi-v8', type: 'info' });
+           output.push({ text: '6.6.20+rpt-rpi-v8', type: 'info' });
         } else {
           output.push({ text: 'Linux', type: 'info' });
         }
@@ -324,9 +324,9 @@ class ShellService {
           output.push({ text: `
        _,met$$$$$gg.          pi@raspberrypi
     ,g$$$$$$$$$$$$$$$P.       --------------
-  ,g$$P"     """Y$$.".        OS: Debian GNU/Linux 13 (trixie) aarch64
+  ,g$$P"     """Y$$.".        OS: Debian GNU/Linux 12 (bookworm) aarch64
  ,$$P'              \`$$$.     Host: Raspberry Pi 5 Model B Rev 1.0
-',$$P       ,ggs.     \`$$b:   Kernel: 6.5.0-rpi-v8
+',$$P       ,ggs.     \`$$b:   Kernel: 6.6.20+rpt-rpi-v8
 \`d$$'     ,$P"'   .    $$$    Uptime: 2 hours, 14 mins
  $$P      d$'     ,    $$P    Packages: 1402 (dpkg)
  $$:      $$.   -    ,d$$'    Shell: bash 5.2.15
@@ -346,10 +346,10 @@ class ShellService {
       case 'apt-get':
         if (args[0] === 'update') {
             output.push(
-                { text: 'Hit:1 http://deb.debian.org/debian trixie InRelease', type: 'info' },
-                { text: 'Hit:2 http://deb.debian.org/debian trixie-updates InRelease', type: 'info' },
-                { text: 'Hit:3 http://security.debian.org/debian-security trixie-security InRelease', type: 'info' },
-                { text: 'Hit:4 http://archive.raspberrypi.com/debian trixie InRelease', type: 'info' },
+                { text: 'Hit:1 http://deb.debian.org/debian bookworm InRelease', type: 'info' },
+                { text: 'Hit:2 http://deb.debian.org/debian bookworm-updates InRelease', type: 'info' },
+                { text: 'Hit:3 http://security.debian.org/debian-security bookworm-security InRelease', type: 'info' },
+                { text: 'Hit:4 http://archive.raspberrypi.com/debian bookworm InRelease', type: 'info' },
                 { text: 'Reading package lists... Done', type: 'info' }
             );
         } else if (args[0] === 'upgrade') {

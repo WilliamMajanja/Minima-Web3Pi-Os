@@ -1,12 +1,8 @@
 
 import { ClusterNode } from '../types';
 
-// Track scan attempts to simulate retry logic
-let scanAttemptCounter = 0;
-
 export const systemService = {
   async scanSubnet(subnet: string, onProgress: (log: string) => void): Promise<ClusterNode[]> {
-    scanAttemptCounter++;
     const found: ClusterNode[] = [];
     const base = subnet.split('.').slice(0, 3).join('.');
     
@@ -14,19 +10,49 @@ export const systemService = {
     await new Promise(r => setTimeout(r, 600));
 
     // Always find the local node (Gateway/Self)
-    const localNode = { ip: '10', node: { id: 'n1', name: 'Pi-Alpha (NVMe Hub)', hat: 'SSD_NVME', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }, delay: 300 };
+    const localNode = { 
+        ip: '10', 
+        node: { 
+            id: 'n1', 
+            name: 'Pi-Alpha (NVMe Hub)', 
+            hat: 'SSD_NVME', 
+            metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 },
+            status: 'online'
+        }, 
+        delay: 300 
+    };
     
-    // Simulate failure on the first attempt (odd numbers) to demonstrate retry logic UI
-    // On even attempts (2nd, 4th, etc.), we find the peers.
-    const shouldSimulateFailure = scanAttemptCounter % 2 !== 0;
+    // Ensure successful discovery for smooth onboarding
+    const shouldSimulateFailure = false;
 
     const scanSteps = [
         { ip: '1', status: 'Gateway', delay: 200 },
         localNode, // Always found
         // Only include peers if we are NOT simulating a failure
+        // Nodes found in 'awaiting-os' state to represent PXE boot clients
         ...(shouldSimulateFailure ? [] : [
-            { ip: '11', node: { id: 'n2', name: 'Pi-Beta (AI Hub)', hat: 'AI_NPU', metrics: { cpu: 8, ram: 1.4, temp: 42, npu: 15 } }, delay: 400 },
-            { ip: '12', node: { id: 'n3', name: 'Pi-Gamma (Sense)', hat: 'SENSE', metrics: { cpu: 15, ram: 3.2, temp: 48, env: { temp: 22.4, humidity: 45, pressure: 1012 } } }, delay: 300 }
+            { 
+                ip: '11', 
+                node: { 
+                    id: 'n2', 
+                    name: 'Pi-Beta (AI Hub)', 
+                    hat: 'AI_NPU', 
+                    metrics: { cpu: 1, ram: 0.2, temp: 32, npu: 0 },
+                    status: 'awaiting-os' 
+                }, 
+                delay: 400 
+            },
+            { 
+                ip: '12', 
+                node: { 
+                    id: 'n3', 
+                    name: 'Pi-Gamma (Sense)', 
+                    hat: 'SENSE', 
+                    metrics: { cpu: 1, ram: 0.2, temp: 31, env: { temp: 0, humidity: 0, pressure: 0 } },
+                    status: 'awaiting-os' 
+                }, 
+                delay: 300 
+            }
         ]),
         { ip: '15', status: 'Unreachable', delay: 100 },
         { ip: '102', status: 'Unreachable', delay: 100 }
@@ -40,13 +66,19 @@ export const systemService = {
         if (step.node) {
             onProgress(`[ACK] Response from ${fullIp} [MAC: B8:27:EB:${Math.floor(Math.random()*99).toString(16).toUpperCase().padStart(2,'0')}:4F]`);
             await new Promise(r => setTimeout(r, 200));
-            onProgress(`[HSK] Handshake with Minima Protocol v1.0.35`);
+            
+            if (step.node.status === 'awaiting-os') {
+                onProgress(`[PXE] PXE Boot Request detected from ${step.node.name}`);
+            } else {
+                onProgress(`[HSK] Handshake with Minima Protocol v1.0.35`);
+            }
+            
             found.push({ 
                 id: step.node.id, 
                 name: step.node.name, 
                 ip: fullIp, 
                 hat: step.node.hat as any, 
-                status: 'online', 
+                status: step.node.status as any, 
                 metrics: step.node.metrics 
             });
         }

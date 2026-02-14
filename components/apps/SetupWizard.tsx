@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ClusterNode } from '../../types';
 import { systemService } from '../../services/systemService';
 
@@ -12,9 +12,11 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [scanLog, setScanLog] = useState<string[]>([]);
+  const [provisionLog, setProvisionLog] = useState<string[]>([]);
   const [nodesFound, setNodesFound] = useState<ClusterNode[]>([
       { id: 'n1', name: 'Pi-Alpha (Local)', ip: '127.0.0.1', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }
   ]);
+  const provLogRef = useRef<HTMLDivElement>(null);
 
   const steps = [
     {
@@ -24,17 +26,17 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
     },
     {
       title: "Initializing Minima Protocol",
-      description: "Connecting to the global Minima network. Your node will be part of a purely decentralized ecosystem.",
+      description: "Starting Alpha Node Protocol Service. Establishing Master Identity on the network.",
       icon: "🌐"
     },
     {
       title: "Network Discovery",
-      description: `Scanning local subnet for Raspberry Pi peers.`,
+      description: `Scanning local subnet for Raspberry Pi peers via PXE/ICMP.`,
       icon: "📡"
     },
     {
-      title: "Cluster Configuration",
-      description: `Configuring ${nodesFound.length} Detected Node${nodesFound.length > 1 ? 's' : ''}. Assigning roles based on hardware Hats (NVMe, NPU, Sense).`,
+      title: "Cluster Synchronization",
+      description: `Provisioning ${nodesFound.length - 1} Worker Nodes. The Alpha node will serve the OS image to Beta & Gamma units via PXE.`,
       icon: "🔌"
     },
     {
@@ -54,6 +56,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
       setStep(0);
       setNodesFound([{ id: 'n1', name: 'Pi-Alpha (Local)', ip: '127.0.0.1', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }]);
       setScanLog([]);
+      setProvisionLog([]);
   };
 
   // Simulated peer discovery using SystemService
@@ -61,17 +64,14 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
       setLoading(true);
       setScanLog([]);
       
-      // Reset to just local before scanning to ensure UI reflects a fresh scan
+      // Reset to just local before scanning
       setNodesFound([{ id: 'n1', name: 'Pi-Alpha (Local)', ip: '127.0.0.1', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }]);
       
       const foundNodes = await systemService.scanSubnet('192.168.1.0', (log) => {
           setScanLog(prev => [...prev.slice(-6), log]);
       });
 
-      // Simulation logic: To ensure the user can "return to start" if empty,
-      // we check if we found anything new.
       if (foundNodes.length <= 1) {
-         // Keep local node but show "no peers" UI state
          setNodesFound(foundNodes.length > 0 ? foundNodes : [{ id: 'n1', name: 'Pi-Alpha (Local)', ip: '127.0.0.1', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }]);
       } else {
          setNodesFound(foundNodes);
@@ -80,8 +80,71 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
       setLoading(false);
   };
 
+  // Auto-scan on step 2
+  useEffect(() => {
+    if (step === 2 && nodesFound.length === 1 && !loading && scanLog.length === 0) {
+        scanForPeers();
+    }
+  }, [step]);
+
+  // Auto-Provisioning Sequence on Step 3
+  useEffect(() => {
+    if (step === 3) {
+        const unprovisioned = nodesFound.filter(n => n.status === 'awaiting-os');
+        if (unprovisioned.length > 0) {
+            runProvisioningSequence(unprovisioned);
+        }
+    }
+  }, [step]);
+
+  // Auto-scroll provision logs
+  useEffect(() => {
+    if (provLogRef.current) {
+        provLogRef.current.scrollTop = provLogRef.current.scrollHeight;
+    }
+  }, [provisionLog]);
+
+  const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+  const runProvisioningSequence = async (nodes: ClusterNode[]) => {
+      setLoading(true);
+      setProvisionLog([]);
+
+      setProvisionLog(prev => [...prev, `[ALPHA] Master Node initializing TFTP Server...`]);
+      await wait(800);
+      setProvisionLog(prev => [...prev, `[ALPHA] Serving PiNetOS.img (arm64) on 192.168.1.10:69`]);
+      await wait(800);
+
+      for (const node of nodes) {
+          setProvisionLog(prev => [...prev, `------------------------------------------------`]);
+          setProvisionLog(prev => [...prev, `[PXE] DHCP Request received from ${node.name} (${node.ip})`]);
+          await wait(600);
+          setProvisionLog(prev => [...prev, `[DHCP] Lease Offered: ${node.ip} mask 255.255.255.0`]);
+          await wait(600);
+          setProvisionLog(prev => [...prev, `[TFTP] Streaming kernel image to ${node.ip}...`]);
+          
+          setNodesFound(prev => prev.map(n => n.id === node.id ? { ...n, status: 'provisioning' } : n));
+          
+          // Simulate flash time
+          for(let i=0; i<3; i++) {
+              await wait(800);
+              setProvisionLog(prev => [...prev, `[FLASH] Writing blocks... ${(i+1)*33}%`]);
+          }
+
+          setProvisionLog(prev => [...prev, `[BOOT] ${node.name} booting PiNetOS...`]);
+          await wait(1000);
+          setProvisionLog(prev => [...prev, `[SYNC] Handshake: Minima Protocol active.`]);
+          
+          setNodesFound(prev => prev.map(n => n.id === node.id ? { ...n, status: 'online' } : n));
+          setProvisionLog(prev => [...prev, `[OK] ${node.name} Online & Synced.`]);
+      }
+      
+      setProvisionLog(prev => [...prev, `------------------------------------------------`]);
+      setProvisionLog(prev => [...prev, `[CLUSTER] Synchronization Complete. All nodes active.`]);
+      setLoading(false);
+  };
+
   const nextStep = () => {
-    // If only local node is found, proceed to next step which effectively means "Use Single Node"
     if (step === 2 && nodesFound.length === 1 && !loading) {
        setStep(step + 1);
        return;
@@ -107,6 +170,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
   };
 
   const isScanFailed = step === 2 && nodesFound.length === 1 && !loading && scanLog.length > 0;
+  const isProvisioningStep = step === 3;
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-6 overflow-hidden">
@@ -124,11 +188,14 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
           <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">{isScanFailed ? "Discovery Failed" : steps[step].title}</h1>
           <p className="text-slate-400 text-lg font-medium leading-relaxed">
             {step === 2 && nodesFound.length === 1 && !loading 
-                ? (scanLog.length > 0 ? "We couldn't detect any other nodes on the network. You can retry the scan or continue with a single node." : "We found 1 device (Local Host). Do you want to scan for cluster peers?") 
-                : steps[step].description}
+                ? (scanLog.length > 0 ? "We couldn't detect any other nodes on the network. You can retry the scan or continue with a single node." : "Scanning for local cluster peers...") 
+                : isProvisioningStep && loading ? "Synchronizing Cluster Topology..." : steps[step].description}
           </p>
           {step === 2 && nodesFound.length > 1 && (
               <p className="text-emerald-400 font-bold animate-pulse">Successfully detected full cluster topology!</p>
+          )}
+          {step === 3 && !loading && nodesFound.every(n => n.status === 'online') && (
+              <p className="text-emerald-400 font-bold animate-pulse">Cluster Synchronized Successfully.</p>
           )}
           {isScanFailed && (
                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 text-sm font-bold flex flex-col gap-2">
@@ -145,6 +212,17 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                  ))}
                  <div className="animate-pulse text-emerald-500">_</div>
              </div>
+        )}
+
+        {isProvisioningStep && provisionLog.length > 0 && (
+            <div ref={provLogRef} className="bg-black/40 rounded-xl p-4 font-mono text-xs text-left h-48 overflow-y-auto border border-white/10 shadow-inner scrollbar-hide">
+                {provisionLog.map((log, i) => (
+                    <div key={i} className={`${log.includes('[OK]') ? 'text-emerald-400' : log.includes('[ALPHA]') ? 'text-pink-400' : 'text-slate-400'} mb-1`}>
+                        {log}
+                    </div>
+                ))}
+                {loading && <div className="animate-pulse text-pink-500">_</div>}
+            </div>
         )}
 
         {step === 2 && !loading ? (
@@ -178,13 +256,15 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                     </button>
                 )}
              </div>
-        ) : loading && step !== 2 ? (
+        ) : (loading && step !== 2) ? (
           <div className="space-y-4">
-            <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/10">
-              <div className="h-full bg-pink-600 transition-all duration-100" style={{ width: `${progress}%` }} />
-            </div>
+            {!isProvisioningStep && (
+                <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/10">
+                    <div className="h-full bg-pink-600 transition-all duration-100" style={{ width: `${progress}%` }} />
+                </div>
+            )}
             <p className="text-[10px] font-bold text-pink-500 uppercase tracking-[0.3em]">
-                "Deploying OS Components..."
+                {isProvisioningStep ? "Cluster PXE Sync in Progress..." : "Deploying OS Components..."}
             </p>
           </div>
         ) : loading && step === 2 ? null : (
@@ -192,14 +272,16 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
             {step > 0 && (
                 <button 
                   onClick={prevStep}
-                  className="px-6 py-5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-2xl text-lg font-bold uppercase tracking-widest border border-white/10 transition-all active:scale-95"
+                  disabled={isProvisioningStep && loading}
+                  className="px-6 py-5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-2xl text-lg font-bold uppercase tracking-widest border border-white/10 transition-all active:scale-95 disabled:opacity-50"
                 >
                   Back
                 </button>
             )}
             <button 
               onClick={nextStep}
-              className="px-10 py-5 bg-pink-600 hover:bg-pink-500 text-white rounded-2xl text-lg font-black uppercase tracking-widest shadow-xl shadow-pink-900/40 transition-all hover:scale-105 active:scale-95"
+              disabled={isProvisioningStep && loading}
+              className="px-10 py-5 bg-pink-600 hover:bg-pink-500 text-white rounded-2xl text-lg font-black uppercase tracking-widest shadow-xl shadow-pink-900/40 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale"
             >
               {step === steps.length - 1 ? "Launch OS" : "Continue"}
             </button>

@@ -12,9 +12,9 @@ PiNetOS is a hardened, appliance-grade Linux OS purpose-built for Raspberry Pi d
 graph TD
     A[Boot ROM] --> B[Signed U-Boot FIT]
     B --> C[Measured Linux Kernel]
-    C --> D[Encrypted RootFS (LUKS)]
+    C --> D["Encrypted RootFS (LUKS)"]
     D --> E[systemd]
-    E --> F[Kiosk Shell (GPU Accelerated)]
+    E --> F["Kiosk Shell (GPU Accelerated)"]
     F --> G[PiNetOS UI / Wallet]
 ```
 
@@ -31,14 +31,14 @@ graph TD
 
 ## 🛠 Build Instructions
 
-**Requirements:** Ubuntu 22.04 / Debian 12 Host, Docker, 30GB Disk.
+**Requirements:** Raspberry Pi OS (Bookworm 64-bit), Docker, 30GB Disk.
 
 ```bash
 # 1. Install Dependencies
 sudo apt update
 sudo apt install -y git curl rsync xz-utils parted qemu-user-static \
 debootstrap zerofree genisoimage squashfs-tools cryptsetup \
-docker.io openssl tpm2-tools chromium network-manager
+docker.io openssl tpm2-tools chromium-browser network-manager
 
 # 2. Clone Generator
 git clone https://github.com/RaspberryPiFoundation/raspi-image-gen
@@ -61,7 +61,7 @@ PiNetOS/
 │   ├── stage1/              # LUKS Encryption
 │   ├── stage2/              # GPU Desktop Stack
 │   ├── stage3/              # Kiosk Lockdown
-│   └── stage4/              # Wallet Subsystem
+│   ├── stage4/              # Wallet Subsystem
 └── tools/                   # Utilities (Signer, Flasher)
 ```
 
