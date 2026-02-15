@@ -21,7 +21,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
   const steps = [
     {
       title: "Minima PiNet Quick Start",
-      description: "Welcome to the official Web3PiOS. We will configure your Raspberry Pi cluster according to Minima's strict decentralization standards.",
+      description: "Welcome to the official Web3PiOS. We will configure your Raspberry Pi according to Minima's strict decentralization standards.",
       icon: "🚀"
     },
     {
@@ -35,8 +35,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
       icon: "📡"
     },
     {
-      title: "Cluster Provisioning",
-      description: `Installing Minima Full Node software on ${nodesFound.length - 1} detected peers. Every device will run its own chain validation.`,
+      title: "Node Provisioning",
+      description: `Installing Minima Full Node software on detected peers. Every device will run its own chain validation.`,
       icon: "💾"
     },
     {
@@ -71,8 +71,9 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
           setScanLog(prev => [...prev.slice(-6), log]);
       });
 
-      if (foundNodes.length <= 1) {
-         setNodesFound(foundNodes.length > 0 ? foundNodes : [{ id: 'n1', name: 'Pi-Alpha (Local)', ip: '127.0.0.1', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }]);
+      if (foundNodes.length === 0) {
+         // Should always find local, but safe fallback
+         setNodesFound([{ id: 'n1', name: 'Pi-Alpha (Local)', ip: '127.0.0.1', hat: 'SSD_NVME', status: 'online', metrics: { cpu: 12, ram: 2.1, temp: 45, iops: 12500 } }]);
       } else {
          setNodesFound(foundNodes);
       }
@@ -82,7 +83,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
 
   // Auto-scan on step 2
   useEffect(() => {
-    if (step === 2 && nodesFound.length === 1 && !loading && scanLog.length === 0) {
+    if (step === 2 && !loading && scanLog.length === 0) {
         scanForPeers();
     }
   }, [step]);
@@ -93,6 +94,9 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
         const unprovisioned = nodesFound.filter(n => n.status === 'awaiting-os');
         if (unprovisioned.length > 0) {
             runProvisioningSequence(unprovisioned);
+        } else {
+            // If nothing to provision (single node already online), just animate logs briefly
+            runSelfCheckSequence();
         }
     }
   }, [step]);
@@ -105,6 +109,20 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
   }, [provisionLog]);
 
   const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+  const runSelfCheckSequence = async () => {
+      setLoading(true);
+      setProvisionLog([]);
+      setProvisionLog(prev => [...prev, `[ALPHA] Verifying Local Full Node Integrity...`]);
+      await wait(600);
+      setProvisionLog(prev => [...prev, `[CHECK] Minima Service Active (PID 1042)`]);
+      await wait(400);
+      setProvisionLog(prev => [...prev, `[CHECK] RPC/P2P Ports Open`]);
+      await wait(400);
+      setProvisionLog(prev => [...prev, `[SUCCESS] Node is ready for standalone operation.`]);
+      await wait(800);
+      setLoading(false);
+  };
 
   const runProvisioningSequence = async (nodes: ClusterNode[]) => {
       setLoading(true);
@@ -157,11 +175,6 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
   };
 
   const nextStep = () => {
-    if (step === 2 && nodesFound.length === 1 && !loading) {
-       setStep(step + 1);
-       return;
-    }
-
     if (step < steps.length - 1) {
       setLoading(true);
       setProgress(0);
@@ -181,7 +194,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
     }
   };
 
-  const isScanFailed = step === 2 && nodesFound.length === 1 && !loading && scanLog.length > 0;
+  const scanFinished = step === 2 && !loading && scanLog.length > 0;
+  const singleNodeMode = scanFinished && nodesFound.length === 1;
   const isProvisioningStep = step === 3;
 
   return (
@@ -191,28 +205,33 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
       
       <div className="max-w-xl w-full glass-dark rounded-[2.5rem] border border-white/10 p-12 relative z-10 shadow-2xl flex flex-col gap-8 text-center transition-all duration-500">
         <div className="flex justify-center">
-          <div className={`w-24 h-24 rounded-3xl flex items-center justify-center text-5xl shadow-2xl shadow-pink-500/20 transition-all ${isScanFailed ? 'bg-amber-500' : 'bg-[#C51A4A] animate-bounce'}`}>
-            {isScanFailed ? '⚠️' : steps[step].icon}
+          <div className={`w-24 h-24 rounded-3xl flex items-center justify-center text-5xl shadow-2xl shadow-pink-500/20 transition-all ${singleNodeMode ? 'bg-emerald-600' : 'bg-[#C51A4A] animate-bounce'}`}>
+            {singleNodeMode ? '✅' : steps[step].icon}
           </div>
         </div>
 
         <div className="space-y-4">
-          <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">{isScanFailed ? "Discovery Failed" : steps[step].title}</h1>
+          <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">
+              {singleNodeMode ? "Scan Complete" : steps[step].title}
+          </h1>
           <p className="text-slate-400 text-lg font-medium leading-relaxed">
-            {step === 2 && nodesFound.length === 1 && !loading 
-                ? (scanLog.length > 0 ? "We couldn't detect any other nodes on the network. You can retry the scan or continue with a single node." : "Scanning subnet for Pi devices...") 
-                : isProvisioningStep && loading ? "Installing Minima Full Node software..." : steps[step].description}
+            {singleNodeMode 
+                ? "Network scan complete. No other peers detected. Proceeding with Single Node configuration."
+                : isProvisioningStep && loading ? "Installing Minima Full Node software..." 
+                : step === 2 && loading ? "Scanning subnet 192.168.1.x for Pi devices..."
+                : steps[step].description}
           </p>
+          
           {step === 2 && nodesFound.length > 1 && (
               <p className="text-emerald-400 font-bold animate-pulse">Topology Detected: {nodesFound.length} Devices</p>
           )}
           {step === 3 && !loading && nodesFound.every(n => n.status === 'online') && (
               <p className="text-emerald-400 font-bold animate-pulse">Minima Protocol Active on All Devices.</p>
           )}
-          {isScanFailed && (
-               <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 text-sm font-bold flex flex-col gap-2">
-                   <span>No other Pi nodes detected on subnet 192.168.1.x</span>
-                   <span className="text-[10px] opacity-70">Check your ethernet switch or wifi credentials.</span>
+          {singleNodeMode && (
+               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm font-bold flex flex-col gap-2">
+                   <span>Local Node Ready (Pi-Alpha)</span>
+                   <span className="text-[10px] opacity-70 text-slate-400">If you add more nodes later, use the Cluster Manager app.</span>
                </div>
           )}
         </div>
@@ -240,33 +259,19 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
         {step === 2 && !loading ? (
              <div className="pt-6 flex flex-col gap-3 justify-center animate-in fade-in slide-in-from-bottom-4">
                 <div className="flex gap-4 justify-center">
-                    {nodesFound.length === 1 && (
-                        <button 
-                            onClick={scanForPeers}
-                            className={`px-8 py-4 text-white rounded-2xl text-md font-bold uppercase tracking-widest shadow-xl transition-all hover:scale-105 active:scale-95 ${
-                                scanLog.length > 0 ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-900/40' : 'bg-indigo-600 hover:bg-indigo-500'
-                            }`}
-                        >
-                            {scanLog.length > 0 ? "Retry Scan" : "Scan Subnet"}
-                        </button>
-                    )}
+                    <button 
+                        onClick={scanForPeers}
+                        className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white rounded-2xl text-md font-bold uppercase tracking-widest shadow-xl transition-all hover:scale-105 active:scale-95"
+                    >
+                        Rescan
+                    </button>
                     <button 
                         onClick={() => setStep(step + 1)}
-                        className={`px-8 py-4 text-white rounded-2xl text-md font-bold uppercase tracking-widest shadow-xl transition-all hover:scale-105 active:scale-95 ${
-                            nodesFound.length === 1 ? 'bg-white/10 hover:bg-white/20 border border-white/10 shadow-none' : 'bg-pink-600 hover:bg-pink-500 shadow-pink-900/40'
-                        }`}
+                        className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-md font-bold uppercase tracking-widest shadow-xl shadow-emerald-900/40 transition-all hover:scale-105 active:scale-95"
                     >
-                        {nodesFound.length === 1 ? "Use Single Node" : "Configure Cluster"}
+                        Continue
                     </button>
                 </div>
-                {nodesFound.length === 1 && scanLog.length > 0 && (
-                    <button 
-                        onClick={restartOnboarding}
-                        className="text-xs font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest mt-4 border border-white/5 hover:bg-white/5 px-6 py-3 rounded-xl mx-auto block"
-                    >
-                        Return to Start
-                    </button>
-                )}
              </div>
         ) : (loading && step !== 2) ? (
           <div className="space-y-4">
@@ -276,7 +281,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                 </div>
             )}
             <p className="text-[10px] font-bold text-pink-500 uppercase tracking-[0.3em]">
-                {isProvisioningStep ? "Installing Minima Service..." : "Verifying Hardware Requirements..."}
+                {isProvisioningStep ? "Configuring Node..." : "Verifying Hardware Requirements..."}
             </p>
           </div>
         ) : loading && step === 2 ? null : (
