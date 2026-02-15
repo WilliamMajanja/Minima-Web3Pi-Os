@@ -83,4 +83,4 @@ Raspberry Pi devices are increasingly used for kiosks, financial terminals, and 
 
 ---
 
-*Built for the Decentralized Edge.*
+*Built for the Raspberry Pi Community,Funded by Minima.*
